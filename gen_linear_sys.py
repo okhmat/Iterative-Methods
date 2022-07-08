@@ -106,7 +106,7 @@ def get_system_DEC(matrixtxt, rhstxt):
 
     rhs = pd.read_csv(rhstxt, sep=" ", header=None)
     rhs.columns = ["row_idx", "col_idx", "val"]
-    print('size of the system: ', N)
+    print('DEC size of the system: ', N)
 
     sprhs = np.zeros((N, 1))
     sprhs[int(rhs.values[0, 0]), int(rhs.values[0, 1])] = rhs.values[0, 2]
@@ -128,5 +128,5 @@ def get_system_Poisson2(matrixtxt, rhstxt):
         aux[i] = int(aux[i])
     sprhs = sp.sparse.csc_matrix(rhs.values[:, 1])  # in the local index
 
-    print('size of the system: ', N)
+    print('Poisson2 size of the system: ', N)
     return spmatrix, sprhs.todense(), N
