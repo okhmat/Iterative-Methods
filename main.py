@@ -43,7 +43,7 @@ if __name__ == "__main__":
 
     t0 = time.time()
     xk1, res1, err1 = jacobi(A=A_DEC, b=b_DEC, x0=np.ones((N_DEC, 1)), maxiter=100)
-    xk2, res2, err = weight_jacobi(A=A_DEC, b=b_DEC, x0=np.ones((N_DEC, 1)), x=None, tol=1e-15, maxiter=100, w=2/3)
+    xk2, res2, err2 = weight_jacobi(A=A_DEC, b=b_DEC, x0=np.ones((N_DEC, 1)), x=None, tol=1e-15, maxiter=100, w=2/3)
     t1 = time.time()
 
     print(t1-t0, " sec")
