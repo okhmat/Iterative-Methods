@@ -12,9 +12,10 @@ Methods:
   3. Successive overrelaxation
   4. Gauss-Seidel method 
   5. Steepest Descent
-  6. Conjugate gradient (CG) and it's preconditioned version
-  7. Biconjugate gradient (BiCG) and it's preconditioned version
-  8. Biconjugate Gradient Stabilized (BiCGStab) - in progress
+  6. Conjugate gradient (CG) and its preconditioned version
+  7. Biconjugate gradient (BiCG) and its preconditioned version
+  8. Biconjugate Gradient Stabilized (BiCGStab) + preconditioned
+  9. GMRES - in progress
 
 Preconditioners:
 
