@@ -118,7 +118,7 @@ def get_system_DEC(matrixtxt, rhstxt):
 def get_system_Poisson2(matrixtxt, rhstxt):
     matrix = pd.read_csv(matrixtxt, sep=" ", header=None)
     matrix.columns = ["row_idx", "col_idx", "val"]
-    N = np.max([np.max(matrix.row_idx), np.max(matrix.row_idx)])
+    N = np.max([np.max(matrix.row_idx), np.max(matrix.row_idx)])+1
     spmatrix = sp.sparse.csc_matrix((matrix.values[:, 2], (matrix.row_idx, matrix.col_idx)))
 
     rhs = pd.read_csv(rhstxt, sep=" ", header=None)
