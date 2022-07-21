@@ -101,7 +101,7 @@ def DEC_sys_assembler(M_row, M_col, M_v, b_row, b_v):
 def get_system_DEC(matrixtxt, rhstxt):
     matrix = pd.read_csv(matrixtxt, sep=" ", header=None)
     matrix.columns = ["row_idx", "col_idx", "val"]
-    N = np.max([np.max(matrix.row_idx), np.max(matrix.row_idx)])+1
+    N = np.max([np.max(matrix.row_idx), np.max(matrix.row_idx)])
     spmatrix = sp.sparse.csc_matrix((matrix.values[:, 2], (matrix.row_idx, matrix.col_idx)))
 
     rhs = pd.read_csv(rhstxt, sep=" ", header=None)
@@ -126,7 +126,13 @@ def get_system_Poisson2(matrixtxt, rhstxt):
     aux = rhs.values[:, 0]
     for i in range(N):
         aux[i] = int(aux[i])
-    sprhs = sp.sparse.csc_matrix(rhs.values[:, 1])  # in the local index
+    sprhs = sp.sparse.csc_matrix(rhs.values[:, 1]).T  # in the local index
+    # it's the row vector, need to return column vector
+
+    assert (spmatrix.shape[0] == spmatrix.shape[1])
+    assert (spmatrix.shape[1] == N)
+    assert (sprhs.shape[0] == N)
+    assert (sprhs.shape[1] == 1)
 
     print('Poisson2 size of the system: ', N)
     return spmatrix, sprhs.todense(), N

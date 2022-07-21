@@ -22,15 +22,12 @@ if __name__ == "__main__":
     #                   M_v="linear_systems/DEC/M_v.txt",
     #                   b_row = "linear_systems/DEC/b_row.txt",
     #                   b_v = "linear_systems/DEC/b_v.txt")
-    A_DEC, b_DEC, N_DEC = get_system_DEC(matrixtxt="linear_systems/DEC/A.csv", rhstxt="linear_systems/DEC/b.csv")
+    # A_DEC, b_DEC, N_DEC = get_system_DEC(matrixtxt="linear_systems/DEC/A.csv", rhstxt="linear_systems/DEC/b.csv")
     A_Siem, b_Siem, N_Siem = get_system_Poisson2(matrixtxt="linear_systems/Poisson2/matrix.txt", rhstxt="linear_systems/Poisson2/rhs.txt")
 
-    print(A_Siem.shape)
-    print(b_Siem.shape)
-    print(N_Siem)
 
-    # # check if these matrices are real, symmetric, positive definite
-    # # DEC
+    # check if these matrices are real, symmetric, positive definite
+    # DEC
     # if (sp.sparse.linalg.norm(A_DEC - A_DEC.T, 'fro') == 0):
     #     print('matrix A is real symmetric')
     # else:
@@ -44,17 +41,18 @@ if __name__ == "__main__":
     #     if (b_DEC[i] != 0):
     #         print(b_DEC[i])
     #         print(i)
-    #
-    #
-    # t0 = time.time()
-    # xk1, res1, err1 = jacobi(A=A_DEC, b=b_DEC, x0=np.ones((N_DEC, 1)), maxiter=100)
-    # xk2, res2, err2 = weight_jacobi(A=A_DEC, b=b_DEC, x0=np.ones((N_DEC, 1)), x=None, tol=1e-15, maxiter=100, w=2/3)
-    # t1 = time.time()
-    #
-    # print(t1-t0, " sec")
-    #
-    # plt.plot(np.log10(res1))
-    # plt.show()
+
+
+    t0 = time.time()
+    xk1, res1, err1 = jacobi(A=A_Siem, b=b_Siem, x0=np.ones((N_Siem, 1)), maxiter=100)
+    xk2, res2, err2 = weight_jacobi(A=A_Siem, b=b_Siem, x0=np.ones((N_Siem, 1)), x=None, tol=1e-15, maxiter=100, w=2/3)
+    t1 = time.time()
+
+    print(t1-t0, " sec")
+
+    plt.plot(np.log10(res1))
+    plt.plot(np.log10(res2))
+    plt.show()
 
 
 
