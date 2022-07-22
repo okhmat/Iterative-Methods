@@ -126,7 +126,10 @@ def get_system_Poisson2(matrixtxt, rhstxt):
     aux = rhs.values[:, 0]
     for i in range(N):
         aux[i] = int(aux[i])
-    sprhs = sp.sparse.csc_matrix(rhs.values[:, 1]).T  # in the local index
+    sprhs = np.asarray(rhs.values[:, 1]).reshape((N,1))  # in the local index
+    
+    print(sprhs.shape)
+    print(type(sprhs))
     # it's the row vector, need to return column vector
 
     assert (spmatrix.shape[0] == spmatrix.shape[1])
@@ -135,4 +138,4 @@ def get_system_Poisson2(matrixtxt, rhstxt):
     assert (sprhs.shape[1] == 1)
 
     print('Poisson2 size of the system: ', N)
-    return spmatrix, sprhs.todense(), N
+    return spmatrix, sprhs, N
