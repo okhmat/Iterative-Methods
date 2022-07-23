@@ -12,6 +12,7 @@ def jacobi(A, b, x0, x=None, tol=1e-15, maxiter=50): # A is a sparse matrix; bet
     LU = L + U
     bnorm = np.linalg.norm(b)
     xk = x0
+
     iter_count = 0
     rk = np.linalg.norm(b - A*xk) / bnorm
     res.append(rk)
@@ -61,7 +62,6 @@ def gauss_seidel(A, b, x0, x, tol=1e-15, maxiter=100):
     DLinv = sp.sparse.linalg.inv(D - L)
 
     bnorm = np.linalg.norm(b)
-
     xk = x0
     iter_count = 0
     rk = np.linalg.norm(b - A * xk) / bnorm
@@ -143,6 +143,7 @@ def sd(A, b, x0, x, tol=1e-15, maxiter=100):
     return xk, res, err, cost
 
 def cg(A, b, x0, x, tol=1e-15, maxiter=10):
+    err = list()
     xk = x0 # x0
     rk = A.dot(xk) - b # r0
     pk = -rk # p0
@@ -160,14 +161,14 @@ def cg(A, b, x0, x, tol=1e-15, maxiter=10):
     while (rk_norm > tol and num_iter < maxiter): # norm of the residual at the current iteration is greater than the preset tolerance
 
         apk = A.dot(pk) # numpy vector in both sparse and non-sparse cases
-        rkrk = np.dot(rk.T, rk)[0, 0] # since the vectors are numpy arrays, columns
-        alpha = rkrk / np.dot(pk.T, apk)[0][0]
+        rkrk = np.dot(rk.T, rk)#[0, 0] # since the vectors are numpy arrays, columns
+        alpha = rkrk / np.dot(pk.T, apk)#[0][0]
 
         xk = xk + alpha * pk # x(k+1)
 
         rk = rk + alpha * apk
 
-        beta = np.dot(rk.T, rk)[0][0] / rkrk
+        beta = np.dot(rk.T, rk)/rkrk  #[0][0] / rkrk
 
         pk = -rk + beta * pk # p(k+1)
 
@@ -232,6 +233,8 @@ def pcg(A, b, x0, x, Ml, Mr, atol=1e-15, maxiter=10):
     return xk, res, err, cost
 
 def bicg(A, b, x0, x, tol=1e-15, maxiter=10):
+    err = list()
+    
     xk = x0
     rk = b - (A @ xk)
     rhk = rk
@@ -325,6 +328,8 @@ def pbicg(A, b, x0, x, Ml, Mr, tol=1e-15, maxiter=10):
     return xk, res, err, cost
 
 def bicgstab(A, b, x0, x, tol=1e-15, maxiter=10):
+    err = list()
+    
     xk = x0
     rk = b - (A @ xk)
     pk = rk

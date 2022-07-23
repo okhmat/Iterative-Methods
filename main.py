@@ -44,15 +44,27 @@ if __name__ == "__main__":
 
 
     t0 = time.time()
-    xk1, res1, err1 = jacobi(A=A_Siem, b=b_Siem, x0=np.ones((N_Siem, 1)), maxiter=100)
-    xk2, res2, err2 = weight_jacobi(A=A_Siem, b=b_Siem, x0=np.ones((N_Siem, 1)), x=None, tol=1e-15, maxiter=100, w=2/3)
+    xk1, res1, err1 = jacobi(A=A_Siem, b=b_Siem, x0=np.ones((N_Siem, 1)), maxiter=500)
+    xk2, res2, err2 = weight_jacobi(A=A_Siem, b=b_Siem, x0=np.ones((N_Siem, 1)), x=None, tol=1e-15, maxiter=500, w=2/3)
+    #xk3, res3, err3 = gauss_seidel(A=A_Siem, b=b_Siem, x0=np.ones((N_Siem,1)), x=None, tol=1e-15, maxiter=10)
+    #xk4, res4, err4 = sor(A=A_Siem, b=b_Siem, x0=np.ones((N_Siem,1)), x=None, tol=1e-15, maxiter=10)
+    xk5, res5, err5, cost5 = sd(A=A_Siem, b=b_Siem, x0=np.ones((N_Siem,1)), x=None, tol=1e-15, maxiter=500)
+    xk6, res6, err6, cost6 = cg(A=A_Siem, b=b_Siem, x0=np.ones((N_Siem,1)), x=None, tol=1e-15, maxiter=500)
+    xk7, res7, err7, cost7 = bicg(A=A_Siem, b=b_Siem, x0=np.ones((N_Siem,1)), x=None, tol=1e-15, maxiter=500)
+    xk8, res8, err8, cost8 = bicgstab(A=A_Siem, b=b_Siem, x0=np.ones((N_Siem,1)), x=None, tol=1e-15, maxiter=500)
     t1 = time.time()
 
     print(t1-t0, " sec")
 
-    plt.plot(np.log10(res1))
-    plt.plot(np.log10(res2))
-    plt.show()
+    plt.figure(figsize=(17, 11))
+    plt.plot(np.log10(res5), label='steepest descent')
+    plt.plot(np.log10(res6), label='conjugate gradient')
+    plt.plot(np.log10(res7), label='biconjugate gradient', linestyle='dotted')
+    plt.plot(np.log10(res8), label='biconjugate gradient stabilized')
+
+    plt.ylabel('relative residue',fontsize=18)
+    plt.xlabel('iteration number',fontsize=18)
+    plt.legend()
 
 
 
