@@ -4,36 +4,131 @@
 #include <Eigen/Sparse>
 #include <chrono>
 #include "method.h"
+#include "gnuplot-iostream.h"
 
 using namespace std;
 using namespace Eigen;
 
 int main()
 {
-	int N = 3000;
-
-	MatrixXd m = MatrixXd::Random(N,N);
+	//----------opening csv files of the system----------
+	ifstream A, b;
 	
-	SparseMatrix<double> A;
-	A = m.sparseView();
+	A.open("C:\\Users\\Puye\\Downloads\\A.csv"); //location of file 'A'
+	b.open("C:\\Users\\Puye\\Downloads\\b.csv"); //location of file 'b'
 
+
+	if (!A) {
+		cout << "csv file 'A' open failed" << endl;
+	}
+	else {
+		cout << "csv file 'A' open success" << endl;
+	}
+	
+	if (!b) {
+		cout << "csv file 'b' open failed" << endl;
+	}
+	else {
+		cout << "csv file 'b' open success" << endl;
+	}
+
+	//----------get number of rows in csv files----------
+	int N = 0, el_num = 0;
+	string line;
+	
+	while (getline(A, line)) {
+		el_num++;
+	}
+	
+	A.clear();
+	A.seekg(0, ios_base::beg);
+
+	while (getline(b, line)) {
+		N++;
+	}
+	
+	b.clear();
+	b.seekg(0, ios_base::beg);
+
+	//----------initialize x0, bvec, tol, maxIter----------
 	VectorXd x0(N, 1);
 	x0.setOnes();
-
-	VectorXd b(N, 1);
-	b.setOnes();
+	
+	VectorXd bvec(N, 1);
 
 	double tol = 1E-15;
-	int maxIter = 1000;
+	int maxIter = 300;
 
+	//----------get matrix A and right-hand side vector b from csv files----------
+	int i = 0, j = 0;
+	string col, row, val, b_val;
+
+	typedef Eigen::Triplet<double> T;
+	std::vector<T> tripletList;
+	tripletList.reserve(el_num);
+
+	while(i < N) { 
+		i++;
+
+		getline(b, b_val, '\n');
+		bvec(i - 1) = stod(b_val);
+	}
+	
+	while (j < el_num) {
+		j++;
+
+		getline(A, row, ',');
+		getline(A, col, ',');
+		getline(A, val, '\n');
+
+		tripletList.push_back(T(stoi(col), stoi(row), stod(val)));
+	}
+
+	SparseMatrix<double> mat(N,N);
+
+	mat.setFromTriplets(tripletList.begin(), tripletList.end());
+
+	//----------initialize results----------
+	VectorXd res1(maxIter), res2(maxIter), res3(maxIter), res4(maxIter), res5(maxIter), res6(maxIter);
+	SparseMatrix<double> xk1, xk2, xk3, xk4, xk5, xk6;
+
+	//----------run all the iterative solvers----------
 	auto start = std::chrono::steady_clock::now();
-
-	jacobi(A, b, x0, tol, maxIter, 1);
+	
+	jacobi(mat, bvec, x0, tol, maxIter, 1, res1, xk1);
+	jacobi(mat, bvec, x0, tol, maxIter, 2.0/3.0, res2, xk2);
+	sor(mat, bvec, x0, tol, maxIter, 1, res3, xk3);
+	sor(mat, bvec, x0, tol, maxIter, 2.0/3.0, res4, xk4);
+	cg(mat, bvec, x0, tol, maxIter, res5, xk5);
+	bicg(mat, bvec, x0, tol, maxIter, res6, xk6);
 
 	auto end = std::chrono::steady_clock::now();
-	std::chrono::duration<double> elapsed_seconds = end - start;
+	chrono::duration<double> elapsed_seconds = end - start;
+	cout << endl << "time: " << elapsed_seconds.count() << "sec" << endl;
 
-	cout << endl << elapsed_seconds.count() << endl;
-	
+	//----------plot residual vs iteration graph----------
+	Gnuplot gp;
+
+	vector<pair<int, double>> pts_jacobi, pts_weighted_jacobi, pts_gauss_seidel, pts_sor, pts_cg, pts_bicgstab;
+	for (int x = 0; x < res1.size(); x++) {
+		pts_jacobi.push_back(make_pair(x + 1, res1[x]));
+		pts_weighted_jacobi.push_back(make_pair(x + 1, res2[x]));
+		pts_gauss_seidel.push_back(make_pair(x + 1, res3[x]));
+		pts_sor.push_back(make_pair(x + 1, res4[x]));
+		pts_cg.push_back(make_pair(x + 1, res5[x]));
+		pts_bicgstab.push_back(make_pair(x + 1, res6[x]));
+	}
+
+	gp << "set format y '10^{% L}'\n";
+	gp << "set logscale y\n";
+	gp << "plot" << gp.file1d(pts_jacobi) << "with lines title 'jacobi'," 
+				 << gp.file1d(pts_weighted_jacobi) << "with lines title 'weighted jacobi',"
+				 << gp.file1d(pts_gauss_seidel) << "with lines title 'gauss seidel',"
+				 << gp.file1d(pts_sor) << "with lines title 'sor',"
+				 << gp.file1d(pts_cg) << "with lines title 'cg',"
+			     //<< gp.file1d(pts_bicgstab) << "with lines title 'bicg stab',"
+				 <<	endl;
+
 	return 0;
 }
+

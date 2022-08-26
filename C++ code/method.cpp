@@ -3,11 +3,13 @@
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
 #include "method.h"
+#include "gnuplot-iostream.h"
+
 
 using namespace std;
 using namespace Eigen;
 
-void jacobi(SparseMatrix<double> A, VectorXd b, VectorXd x0, double tol, int maxIter, float w) {
+void jacobi(const SparseMatrix<double> &A, const VectorXd &b, const VectorXd &x0, const double tol, const int maxIter, float w, VectorXd &res, SparseMatrix<double> &xk) {
 
 	MatrixXd Dinv = A.diagonal().asDiagonal();
 	for (int i = 0; i < A.cols(); ++i) {
@@ -29,13 +31,12 @@ void jacobi(SparseMatrix<double> A, VectorXd b, VectorXd x0, double tol, int max
 
 	double bnorm = b.norm();
 
-	SparseMatrix<double> xk = x0.sparseView();
+	xk = x0.sparseView();
 
 	int iter = 0;
 	double rknorm = (b - A * xk).norm() / bnorm;
 
-	VectorXd res(maxIter);
-	res(iter) = rknorm;
+	res[iter] = rknorm;
 
 	while (iter < maxIter && rknorm > tol) {
 		iter++;
@@ -44,13 +45,11 @@ void jacobi(SparseMatrix<double> A, VectorXd b, VectorXd x0, double tol, int max
 		xk = Dinvs * xk;
 
 		rknorm = (b - A * xk).norm() / bnorm;
-		res(iter) = rknorm;
+		res[iter] = rknorm;
 	}
-
-	//cout << endl << res << endl;
 }
 
-void sor(SparseMatrix<double> A, VectorXd b, VectorXd x0, double tol, int maxIter, float w) {
+void sor(const SparseMatrix<double> &A, const VectorXd &b, const VectorXd &x0, const double tol, const int maxIter, float w, VectorXd &res, SparseMatrix<double> &xk) {
 	
 	MatrixXd D = A.diagonal().asDiagonal();
 	MatrixXd L = -A.triangularView<StrictlyLower>();
@@ -64,13 +63,12 @@ void sor(SparseMatrix<double> A, VectorXd b, VectorXd x0, double tol, int maxIte
 
 	double bnorm = b.norm();
 
-	SparseMatrix<double> xk = x0.sparseView();
+	xk = x0.sparseView();
 
 	int iter = 0;
 	double rknorm = (b - A * xk).norm() / bnorm;
 
-	VectorXd res(maxIter);
-	res(iter) = rknorm;
+	res[iter] = rknorm;
 
 	while (iter < maxIter && rknorm > tol) {
 		iter++;
@@ -79,24 +77,21 @@ void sor(SparseMatrix<double> A, VectorXd b, VectorXd x0, double tol, int maxIte
 		xk = DLinvs * xk;
 
 		rknorm = (b - A * xk).norm() / bnorm;
-		res(iter) = rknorm;
+		res[iter] = rknorm;
 	}
-
-	//cout << endl << res << endl;
 }
 
-void sd(SparseMatrix<double> A, VectorXd b, VectorXd x0, double tol, int maxIter) {
+void sd(const SparseMatrix<double>& A, const VectorXd& b, const VectorXd& x0, const double tol, const int maxIter, VectorXd& res, SparseMatrix<double>& xk) {
 	
 	double bnorm = b.norm();
 
-	SparseMatrix<double> xk = x0.sparseView();
+	xk = x0.sparseView();
 
 	int iter = 0;
 	SparseMatrix<double> rk = b - A * xk;
 	double rknorm = rk.norm() / bnorm;
 
-	VectorXd res(maxIter);
-	res(iter) = rknorm;
+	res[iter] = rknorm;
 
 	double aux1, aux2, alphak;
 
@@ -111,15 +106,15 @@ void sd(SparseMatrix<double> A, VectorXd b, VectorXd x0, double tol, int maxIter
 
 		rk = b - A * xk;
 		rknorm = rk.norm() / bnorm;
-		res(iter) = rknorm;
+		res[iter] = rknorm;
 	}
 
 	//cout << endl << res << endl;
 }
 
-void cg(SparseMatrix<double> A, VectorXd b, VectorXd x0, double tol, int maxIter) {
+void cg(const SparseMatrix<double>& A, const VectorXd& b, const VectorXd& x0, const double tol, const int maxIter, VectorXd& res, SparseMatrix<double>& xk) {
 
-	SparseMatrix<double> xk = x0.sparseView();
+	xk = x0.sparseView();
 	SparseMatrix<double> rk = A * xk - b;
 	SparseMatrix<double> pk = -rk;
 
@@ -127,8 +122,7 @@ void cg(SparseMatrix<double> A, VectorXd b, VectorXd x0, double tol, int maxIter
 	double rknorm = rk.norm() / bnorm;
 
 	int iter = 0;
-	VectorXd res(maxIter);
-	res(iter) = rknorm;
+	res[iter] = rknorm;
 
 	SparseMatrix<double> apk;
 	double rkrk, alpha, beta;
@@ -148,25 +142,22 @@ void cg(SparseMatrix<double> A, VectorXd b, VectorXd x0, double tol, int maxIter
 		pk = -rk + beta * pk;
 
 		rknorm = rk.norm() / bnorm;
-		res(iter) = rknorm;
+		res[iter] = rknorm;
 	}
-
-	cout << endl << res << endl;
 }
 
-void pcg(SparseMatrix<double> A, VectorXd b, VectorXd x0, SparseMatrix<double> Ml, SparseMatrix<double> Mr, double tol, int maxIter) {
+void pcg(const SparseMatrix<double>& A, const VectorXd& b, const VectorXd& x0, const SparseMatrix<double>& Ml, const SparseMatrix<double>& Mr, const double tol, const int maxIter, VectorXd& res, SparseMatrix<double>& xk) {
 	SparseMatrix<double> uk = x0.sparseView();
 	SparseMatrix<double> rk = Ml * (A * uk - b);
 	SparseMatrix<double> pk = -rk;
-	SparseMatrix<double> xk = Mr * uk;
+	xk = Mr * uk;
 	SparseMatrix<double> A1 = Ml * A * Mr;
 
 	double bnorm = b.norm();
 	double rknorm = rk.norm() / bnorm;
 
 	int iter = 0;
-	VectorXd res(maxIter);
-	res(iter) = rknorm;
+	res[iter] = rknorm;
 
 	SparseMatrix<double> apk;
 	double rkrk, alpha, beta;
@@ -188,14 +179,12 @@ void pcg(SparseMatrix<double> A, VectorXd b, VectorXd x0, SparseMatrix<double> M
 		pk = -rk + beta * pk;
 
 		rknorm = rk.norm() / bnorm;
-		res(iter) = rknorm;
+		res[iter] = rknorm;
 	}
-
-	//cout << endl << res << endl;
 }
 
-void bicg(SparseMatrix<double> A, VectorXd b, VectorXd x0, double tol, int maxIter) {
-	SparseMatrix<double> xk = x0.sparseView();
+void bicg(const SparseMatrix<double>& A, const VectorXd& b, const VectorXd& x0, const double tol, const int maxIter, VectorXd& res, SparseMatrix<double>& xk) {
+    xk = x0.sparseView();
 	SparseMatrix<double> rk = b - A * xk;
 	SparseMatrix<double> rhk = rk;
 	SparseMatrix<double> pk = rk;
@@ -205,8 +194,7 @@ void bicg(SparseMatrix<double> A, VectorXd b, VectorXd x0, double tol, int maxIt
 	double rknorm = rk.norm() / bnorm;
 
 	int iter = 0;
-	VectorXd res(maxIter);
-	res(iter) = rknorm;
+	res[iter] = rknorm;
 
 	SparseMatrix<double> apk;
 	double rhkrk, alpha, beta;
@@ -228,28 +216,25 @@ void bicg(SparseMatrix<double> A, VectorXd b, VectorXd x0, double tol, int maxIt
 		phk = rhk + beta * phk;
 
 		rknorm = rk.norm() / bnorm;
-		res(iter) = rknorm;
+		res[iter] = rknorm;
 	}
-
-	cout << endl << res << endl;
 }
 
-void pbicg(SparseMatrix<double> A, VectorXd b, VectorXd x0, SparseMatrix<double> Ml, SparseMatrix<double> Mr, double tol, int maxIter) {
+void pbicg(const SparseMatrix<double>& A, const VectorXd& b, const VectorXd& x0, const SparseMatrix<double>& Ml, const SparseMatrix<double>& Mr, const double tol, const int maxIter, VectorXd& res, SparseMatrix<double>& xk) {
 	SparseMatrix<double> uk = x0.sparseView();
 	SparseMatrix<double> rk = Ml * (b - A * uk);
 	SparseMatrix<double> rhk = rk;
 	SparseMatrix<double> pk = rk;
 	SparseMatrix<double> phk = rhk;
 
-	SparseMatrix<double> xk = Mr * uk;
+	xk = Mr * uk;
 	SparseMatrix<double> A1 = Ml * A * Mr;
 
 	double bnorm = b.norm();
 	double rknorm = rk.norm() / bnorm;
 
 	int iter = 0;
-	VectorXd res(maxIter);
-	res(iter) = rknorm;
+	res[iter] = rknorm;
 
 	SparseMatrix<double> apk;
 	double rhkrk, alpha, beta;
@@ -274,14 +259,12 @@ void pbicg(SparseMatrix<double> A, VectorXd b, VectorXd x0, SparseMatrix<double>
 		phk = rhk + beta * phk;
 
 		rknorm = rk.norm() / bnorm;
-		res(iter) = rknorm;
+		res[iter] = rknorm;
 	}
-
-	//cout << endl << res << endl;
 }
 
-void bicg_stab(SparseMatrix<double> A, VectorXd b, VectorXd x0, double tol, int maxIter) {
-	SparseMatrix<double> xk = x0.sparseView();
+void bicg_stab(const SparseMatrix<double>& A, const VectorXd& b, const VectorXd& x0, const double tol, const int maxIter, VectorXd& res, SparseMatrix<double>& xk) {
+	xk = x0.sparseView();
 	SparseMatrix<double> rk = b - A * xk;
 	SparseMatrix<double> pk = rk;
 	SparseMatrix<double> rh = rk;
@@ -290,8 +273,7 @@ void bicg_stab(SparseMatrix<double> A, VectorXd b, VectorXd x0, double tol, int 
 	double rknorm = rk.norm() / bnorm;
 
 	int iter = 0;
-	VectorXd res(maxIter);
-	res(iter) = rknorm;
+	res[iter] = rknorm;
 
 	SparseMatrix<double> sk, apk, ask;
 	double rhrk, alpha, beta, wk;
@@ -317,27 +299,24 @@ void bicg_stab(SparseMatrix<double> A, VectorXd b, VectorXd x0, double tol, int 
 		pk = rk + beta * (pk - wk * apk);
 
 		rknorm = rk.norm() / bnorm;
-		res(iter) = rknorm;
+		res[iter] = rknorm;
 	}
-
-	cout << endl << res << endl;
 }
 
-void pbicg_stab(SparseMatrix<double> A, VectorXd b, VectorXd x0, SparseMatrix<double> Ml, SparseMatrix<double> Mr, double tol, int maxIter) {
+void pbicg_stab(const SparseMatrix<double>& A, const VectorXd& b, const VectorXd& x0, const SparseMatrix<double>& Ml, const SparseMatrix<double>& Mr, const double tol, const int maxIter, VectorXd& res, SparseMatrix<double>& xk) {
 	SparseMatrix<double> uk = x0.sparseView();
 	SparseMatrix<double> rk = Ml * (b - A * uk);
 	SparseMatrix<double> pk = rk;
 	SparseMatrix<double> rh = rk;
 
-	SparseMatrix<double> xk = Mr * uk;
+	xk = Mr * uk;
 	SparseMatrix<double> A1 = Ml * A * Mr;
 
 	double bnorm = b.norm();
 	double rknorm = rk.norm() / bnorm;
 
 	int iter = 0;
-	VectorXd res(maxIter);
-	res(iter) = rknorm;
+	res[iter] = rknorm;
 
 	SparseMatrix<double> sk, apk, ask;
 	double rhrk, alpha, beta, wk;
@@ -364,13 +343,11 @@ void pbicg_stab(SparseMatrix<double> A, VectorXd b, VectorXd x0, SparseMatrix<do
 		pk = rk + beta * (pk - wk * apk);
 
 		rknorm = rk.norm() / bnorm;
-		res(iter) = rknorm;
+		res[iter] = rknorm;
 	}
-
-	cout << endl << res << endl;
 }
 
-SparseMatrix<double> precond_jacobi(SparseMatrix<double> A) {
+void precond_jacobi(const SparseMatrix<double>& A, SparseMatrix<double>& M) {
 	MatrixXd D = A.diagonal().asDiagonal();
 
 	for (int i = 0; i < A.cols(); ++i) {
@@ -379,7 +356,5 @@ SparseMatrix<double> precond_jacobi(SparseMatrix<double> A) {
 		}
 	}
 
-	SparseMatrix<double> Ds = D.sparseView();
-
-	return Ds;
+	M = D.sparseView();
 }

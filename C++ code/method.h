@@ -6,17 +6,17 @@
 
 using namespace Eigen;
 
-void jacobi(SparseMatrix<double> A, VectorXd b, VectorXd x0, double tol, int maxIter, float w);
-void sor(SparseMatrix<double> A, VectorXd b, VectorXd x0, double tol, int maxIter, float w);
-void sd(SparseMatrix<double> A, VectorXd b, VectorXd x0, double tol, int maxIter);
-void cg(SparseMatrix<double> A, VectorXd b, VectorXd x0, double tol, int maxIter);
-void bicg(SparseMatrix<double> A, VectorXd b, VectorXd x0, double tol, int maxIter);
-void bicg_stab(SparseMatrix<double> A, VectorXd b, VectorXd x0, double tol, int maxIter);
+void jacobi(const SparseMatrix<double>& A, const VectorXd& b, const VectorXd& x0, const double tol, const int maxIter, float w, VectorXd& res, SparseMatrix<double>& xk);
+void sor(const SparseMatrix<double>& A, const VectorXd& b, const VectorXd& x0, const double tol, const int maxIter, float w, VectorXd& res, SparseMatrix<double>& xk);
+void sd(const SparseMatrix<double>& A, const VectorXd& b, const VectorXd& x0, const double tol, const int maxIter, VectorXd& res, SparseMatrix<double>& xk);
+void cg(const SparseMatrix<double>& A, const VectorXd& b, const VectorXd& x0, const double tol, const int maxIter, VectorXd& res, SparseMatrix<double>& xk);
+void bicg(const SparseMatrix<double>& A, const VectorXd& b, const VectorXd& x0, const double tol, const int maxIter, VectorXd& res, SparseMatrix<double>& xk);
+void bicg_stab(const SparseMatrix<double>& A, const VectorXd& b, const VectorXd& x0, const double tol, const int maxIter, VectorXd& res, SparseMatrix<double>& xk);
 
-void pcg(SparseMatrix<double> A, VectorXd b, VectorXd x0, SparseMatrix<double> Ml, SparseMatrix<double> Mr, double tol, int maxIter);
-void pbicg(SparseMatrix<double> A, VectorXd b, VectorXd x0, SparseMatrix<double> Ml, SparseMatrix<double> Mr, double tol, int maxIter);
-void pbicg_stab(SparseMatrix<double> A, VectorXd b, VectorXd x0, SparseMatrix<double> Ml, SparseMatrix<double> Mr, double tol, int maxIter);
+void pcg(const SparseMatrix<double>& A, const VectorXd& b, const VectorXd& x0, const SparseMatrix<double>& Ml, const SparseMatrix<double>& Mr, const double tol, const int maxIter, VectorXd& res, SparseMatrix<double>& xk);
+void pbicg(const SparseMatrix<double>& A, const VectorXd& b, const VectorXd& x0, const SparseMatrix<double>& Ml, const SparseMatrix<double>& Mr, const double tol, const int maxIter, VectorXd& res, SparseMatrix<double>& xk);
+void pbicg_stab(const SparseMatrix<double>& A, const VectorXd& b, const VectorXd& x0, const SparseMatrix<double>& Ml, const SparseMatrix<double>& Mr, const double tol, const int maxIter, VectorXd& res, SparseMatrix<double>& xk);
 
-SparseMatrix<double> precond_jacobi(SparseMatrix<double> A);
- 
+void precond_jacobi(const SparseMatrix<double>& A, SparseMatrix<double>& M);
+
 #endif
