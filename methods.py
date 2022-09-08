@@ -152,8 +152,8 @@ def cg(A, b, x0, x, tol=1e-15, maxiter=10):
 
     res = [rk_norm] # accumulates residuals rk_norm at each iteration
     if (x is not None):
-        err = [np.linalg.norm(x - xk)/xnorm]
         xnorm = np.linalg.norm(x)
+        err = [np.linalg.norm(x - xk)/xnorm]
     cost = [quadratic_cost_f(A, xk, b)]
 
     num_iter = 0 # iteration counter
