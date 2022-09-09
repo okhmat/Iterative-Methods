@@ -119,7 +119,7 @@ int main()
 
 	jacobi(mat, bvec, x0, tol, maxIter, 2.0/3.0, res2, xk2);
 	auto t2 = std::chrono::steady_clock::now();
-	chrono::duration<double> elapsed_seconds = t2 - t1;
+	elapsed_seconds = t2 - t1;
 	cout << endl << "weighted jacobi run time: " << elapsed_seconds.count() << "sec" << endl;
 
 	sor(mat, bvec, x0, tol, maxIter, 1, res3, xk3);
