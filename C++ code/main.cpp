@@ -14,8 +14,8 @@ int main()
 	//----------opening csv files of the system----------
 	ifstream A, b;
 	
-	A.open("C:\\Users\\Puye\\project\\Iterative-Methods\\linear_systems\\DEC\\A.csv"); //location of file 'A'
-	b.open("C:\\Users\\Puye\\project\\Iterative-Methods\\linear_systems\\DEC\\b.csv"); //location of file 'b'
+	A.open("./Linear_Systems/A.csv"); //location of file 'A'
+	b.open("./Linear_Systems/b.csv"); //location of file 'b'
 
 
 	if (!A) {
