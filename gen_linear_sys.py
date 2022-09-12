@@ -79,7 +79,7 @@ def DEC_sys_assembler(M_row, M_col, M_v, b_row, b_v):
     # convert those vectors to CSV
     with open('linear_systems/DEC/A.csv', 'w') as f:
         f.truncate()
-        writer = csv.writer(f, delimiter=",")
+        writer = csv.writer(f, delimiter=" ")
         for i in range(Nnnz):
             writer.writerow([rows[0][i] - 1, cols[0][i] - 1, vals[0][i]])
 

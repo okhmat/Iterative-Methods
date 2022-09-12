@@ -1,0 +1,3 @@
+/Users/ivanokhmatovskii/Desktop/Iterative-Methods/C++ code/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/Users/ivanokhmatovskii/Desktop/Iterative-Methods/C++ code/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/ivanokhmatovskii/Desktop/Iterative-Methods/C++ code/cmake-build-debug/CMakeFiles/C___code.dir
