@@ -1,10 +1,10 @@
 #include <iostream>
 #include <fstream>
-#include <Eigen/Dense>
-#include <Eigen/Sparse>
+#include </usr/local/Cellar/eigen/3.4.0_1/include/eigen3/Eigen/Dense>
+#include </usr/local/Cellar/eigen/3.4.0_1/include/eigen3/Eigen/Sparse>
 #include <chrono>
 #include "method.h"
-#include "gnuplot-iostream.h"
+//#include "gnuplot-iostream.h"
 
 using namespace std;
 using namespace Eigen;
@@ -12,14 +12,14 @@ using namespace Eigen;
 int main()
 {
 	//----------opening csv files of the system----------
-	ifstream A, b;
-	
-	A.open("./Linear_Systems/A.csv"); //location of file 'A'
-	b.open("./Linear_Systems/b.csv"); //location of file 'b'
+	ifstream A("./Linear_Systems/A.csv", ifstream::in);
+    ifstream b("./Linear_Systems/b.csv", ifstream::in);
 
 
 	if (!A) {
 		cout << "csv file 'A' open failed" << endl;
+        A.close();
+        return 0;
 	}
 	else {
 		cout << "csv file 'A' open success" << endl;
@@ -27,10 +27,13 @@ int main()
 	
 	if (!b) {
 		cout << "csv file 'b' open failed" << endl;
+        b.close();
+        return 0;
 	}
 	else {
 		cout << "csv file 'b' open success" << endl;
 	}
+
 
 	//----------get number of rows in csv files----------
 	int N = 0, el_num = 0, b_num = 0;
@@ -41,7 +44,7 @@ int main()
 	}
 	cout << el_num << endl;
 	
-	A.clear();
+	A.clear(); // what's the functionality of this?
 	A.seekg(0, ios_base::beg);
 	
 	
@@ -53,7 +56,7 @@ int main()
 	b.clear();
 	b.seekg(0, ios_base::beg);
 	
-	N = 4211 + 1; // NEED TO CHANGE THIS PART
+	N = 4211-1; // NEED TO CHANGE THIS PART
 
 	//----------initialize x0, bvec, tol, maxIter----------
 	VectorXd x0(N, 1);
@@ -99,6 +102,9 @@ int main()
 		tripletList.push_back(T(stoi(col), stoi(row), stod(val)));
 	}
 
+    // don't forget to close the file descriptors when you're done with them
+    A.close(); b.close();
+
 	SparseMatrix<double> mat(N,N);
 
 	mat.setFromTriplets(tripletList.begin(), tripletList.end());
@@ -137,31 +143,31 @@ int main()
 	cout << endl << "time: " << elapsed_seconds.count() << "sec" << endl;
 
 	//----------plot residual vs iteration graph----------
-	Gnuplot gp;
 
-	vector<pair<int, double>> pts_jacobi, pts_weighted_jacobi, pts_gauss_seidel, pts_sor, pts_cg, pts_bicg, pts_bicg_stab, pts_pcg_jacobi;
-	for (int x = 0; x < res1.size(); x++) {
-		pts_jacobi.push_back(make_pair(x + 1, res1[x]));
-		pts_weighted_jacobi.push_back(make_pair(x + 1, res2[x]));
-		pts_gauss_seidel.push_back(make_pair(x + 1, res3[x]));
-		pts_sor.push_back(make_pair(x + 1, res4[x]));
-		pts_cg.push_back(make_pair(x + 1, res5[x]));
-		pts_bicg.push_back(make_pair(x + 1, res6[x]));
-		pts_bicg_stab.push_back(make_pair(x + 1, res7[x]));
-		pts_pcg_jacobi.push_back(make_pair(x + 1, res8[x]));
-	}
+    vector<pair<int, double> > pts_jacobi, pts_weighted_jacobi, pts_gauss_seidel, pts_sor, pts_cg, pts_bicg, pts_bicg_stab, pts_pcg_jacobi;
+    for (int x = 0; x < res1.size(); x++) {
+        pts_jacobi.push_back(make_pair(x + 1, res1[x]));
+        pts_weighted_jacobi.push_back(make_pair(x + 1, res2[x]));
+        pts_gauss_seidel.push_back(make_pair(x + 1, res3[x]));
+        pts_sor.push_back(make_pair(x + 1, res4[x]));
+        pts_cg.push_back(make_pair(x + 1, res5[x]));
+        pts_bicg.push_back(make_pair(x + 1, res6[x]));
+        pts_bicg_stab.push_back(make_pair(x + 1, res7[x]));
+        pts_pcg_jacobi.push_back(make_pair(x + 1, res8[x]));
+    }
 
-	gp << "set format y '10^{% L}'\n";
-	gp << "set logscale y\n";
-	gp << "plot" << gp.file1d(pts_jacobi) << "with lines title 'jacobi'," 
-				 << gp.file1d(pts_weighted_jacobi) << "with lines title 'weighted jacobi',"
-				 << gp.file1d(pts_gauss_seidel) << "with lines title 'gauss seidel',"
-				 << gp.file1d(pts_sor) << "with lines title 'sor',"
-				 << gp.file1d(pts_cg) << "with lines title 'cg',"
-			     //<< gp.file1d(pts_bicg) << "with lines title 'bicg',"
-				 //<< gp.file1d(pts_bicg_stab) << "with lines title 'bicg stab',"
-			     //<< gp.file1d(pts_pcg_jacobi) << "with lines title 'pcg jacobi',"
-				 <<	endl;
+//    Gnuplot gp;
+//    gp << "set format y '10^{% L}'\n";
+//	gp << "set logscale y\n";
+//	gp << "plot" << gp.file1d(pts_jacobi) << "with lines title 'jacobi',"
+//				 << gp.file1d(pts_weighted_jacobi) << "with lines title 'weighted jacobi',"
+//				 << gp.file1d(pts_gauss_seidel) << "with lines title 'gauss seidel',"
+//				 << gp.file1d(pts_sor) << "with lines title 'sor',"
+//				 << gp.file1d(pts_cg) << "with lines title 'cg',"
+//			     //<< gp.file1d(pts_bicg) << "with lines title 'bicg',"
+//				 //<< gp.file1d(pts_bicg_stab) << "with lines title 'bicg stab',"
+//			     //<< gp.file1d(pts_pcg_jacobi) << "with lines title 'pcg jacobi',"
+//				 <<	endl;
 
 	return 0;
 }

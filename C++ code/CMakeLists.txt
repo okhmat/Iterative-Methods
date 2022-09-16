@@ -8,4 +8,4 @@ include_directories(.)
 add_executable(C___code
         main.cpp
         method.cpp
-        method.h)
+        method.h test.cpp)
