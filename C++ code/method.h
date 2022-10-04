@@ -1,8 +1,8 @@
 #ifndef method_h
 #define method_h
 
-#include </usr/local/Cellar/eigen/3.4.0_1/include/eigen3/Eigen/Dense>
-#include </usr/local/Cellar/eigen/3.4.0_1/include/eigen3/Eigen/Sparse>
+#include <Eigen/Dense>
+#include <Eigen/Sparse>
 
 using namespace Eigen;
 
@@ -18,5 +18,6 @@ void pbicg(const SparseMatrix<double>& A, const VectorXd& b, const VectorXd& x0,
 void pbicg_stab(const SparseMatrix<double>& A, const VectorXd& b, const VectorXd& x0, const SparseMatrix<double>& Ml, const SparseMatrix<double>& Mr, const double tol, const int maxIter, VectorXd& res, SparseMatrix<double>& xk);
 
 void precond_jacobi(const SparseMatrix<double>& A, SparseMatrix<double>& M);
+void precond_ichol(const SparseMatrix<double>& A, SparseMatrix<double>& Ml, SparseMatrix<double>& Mr);
 
 #endif

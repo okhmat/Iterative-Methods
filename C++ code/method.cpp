@@ -1,9 +1,9 @@
 #include <iostream>
 #include <fstream>
-#include </usr/local/Cellar/eigen/3.4.0_1/include/eigen3/Eigen/Dense>
-#include </usr/local/Cellar/eigen/3.4.0_1/include/eigen3/Eigen/Sparse>
+#include <Eigen/Dense>
+#include <Eigen/Sparse>
 #include "method.h"
-//#include "gnuplot-iostream/gnuplot-iostream.h"
+#include "gnuplot-iostream.h"
 
 
 using namespace std;
@@ -285,7 +285,7 @@ void bicg_stab(const SparseMatrix<double>& A, const VectorXd& b, const VectorXd&
 		rhrk = (rh.transpose() * rk).norm();
 
 		alpha = rhrk / (rh.transpose() * apk).norm();
-
+		
 		sk = rk - alpha * apk;
 		ask = A * sk;
 
@@ -293,7 +293,7 @@ void bicg_stab(const SparseMatrix<double>& A, const VectorXd& b, const VectorXd&
 
 		xk = xk + alpha * pk + wk * sk;
 		rk = sk - wk * ask;
-
+		
 		beta = (rh.transpose() * rk).norm() / rhrk * (alpha / wk);
 
 		pk = rk + beta * (pk - wk * apk);
@@ -357,4 +357,36 @@ void precond_jacobi(const SparseMatrix<double>& A, SparseMatrix<double>& M) {
 	}
 
 	M = D.sparseView();
+}
+
+// matrix A must be possitive definite in order for incomplete Cholesky to work!!!
+void precond_ichol(const SparseMatrix<double>& A, SparseMatrix<double>& Ml, SparseMatrix<double>& Mr) {
+	int n = A.cols();
+	MatrixXd L(n, n);
+	L = MatrixXd::Zero(n, n);
+
+	for (int j = 0; j < n; j++) {
+		for (SparseMatrix<double>::InnerIterator it(A, j); it; ++it) {
+			double sumk = 0;
+			
+			if (it.row() == j) {
+				for (int k = 0; k < j; k++) {
+					sumk += pow(L(it.row(), k), 2.0);
+				}
+
+				L(it.row(), j) = sqrt(it.value() - sumk);
+			}
+			else if (it.row() > j) {
+				for (int k = 0; k < j; k++) {
+					sumk += L(it.row(), k) * L(j, k);
+				}
+
+				L(it.row(), j) = (it.value() - sumk) / L(j, j);
+			}
+		}
+
+	}
+
+	Ml = L.inverse().sparseView();
+	Mr = L.transpose().inverse().sparseView();
 }
