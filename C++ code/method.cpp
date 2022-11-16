@@ -365,26 +365,23 @@ void precond_ichol(const SparseMatrix<double>& A, SparseMatrix<double>& Ml, Spar
 	MatrixXd L(n, n);
 	L = MatrixXd::Zero(n, n);
 
-	for (int j = 0; j < n; j++) {
-		for (SparseMatrix<double>::InnerIterator it(A, j); it; ++it) {
+	for (int j = 0; j < n; j++) {		
+		for (int i = j; i < n; i++) {
 			double sumk = 0;
-			
-			if (it.row() == j) {
+			if (i == j) {
 				for (int k = 0; k < j; k++) {
-					sumk += pow(L(it.row(), k), 2.0);
+					sumk += pow(L(i, k), 2.0);
 				}
-
-				L(it.row(), j) = sqrt(it.value() - sumk);
+				L(i, j) = sqrt(A.coeff(i,j) - sumk);
 			}
-			else if (it.row() > j) {
+			else {
+				double sumk = 0;
 				for (int k = 0; k < j; k++) {
-					sumk += L(it.row(), k) * L(j, k);
+					sumk += L(i, k) * L(j, k);
 				}
-
-				L(it.row(), j) = (it.value() - sumk) / L(j, j);
+				L(i, j) = (A.coeff(i,j) - sumk) / L(j, j);
 			}
 		}
-
 	}
 
 	Ml = L.inverse().sparseView();
